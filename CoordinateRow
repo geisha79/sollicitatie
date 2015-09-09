@@ -1,0 +1,32 @@
+package snake;
+
+public class CoordinateRow {
+
+	static final int MAX_AANTAL_ELEMENTEN = 1000;
+	Coordinate[] coordinateArray;
+	int aantalElementen;
+	
+	CoordinateRow(){
+		coordinateArray = new Coordinate[MAX_AANTAL_ELEMENTEN];
+		aantalElementen = 0;
+	}
+
+	void voegToe(Coordinate a){
+		coordinateArray[aantalElementen]=a;
+		aantalElementen +=1;
+	}
+	
+	CoordinateRow samenvoegen (Coordinate coordinaat){
+		CoordinateRow resultaat= new CoordinateRow();
+		resultaat.voegToe(coordinaat);		
+		for (int i = 0; i < aantalElementen; i++){
+			resultaat.voegToe(coordinateArray[i]);
+		}
+		return resultaat;
+	}
+
+	void laatsteWeg(){
+		aantalElementen--;
+	}
+	
+}
