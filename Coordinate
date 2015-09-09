@@ -1,0 +1,23 @@
+package snake;
+
+public class Coordinate {
+	int x;
+	int y;
+	
+	Coordinate(){
+		x=0;
+		y=0;
+	}
+	
+	Coordinate(int x, int y){
+		this.x = x;
+		this.y = y;
+	}
+	
+	Coordinate opschuiven(Coordinate richting){
+		Coordinate coordinaat = new Coordinate();
+		coordinaat.x = x + richting.x;
+		coordinaat.y = y + richting.y;
+		return coordinaat;
+	}
+}
