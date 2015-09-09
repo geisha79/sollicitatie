@@ -1,0 +1,136 @@
+
+package snake;
+
+import ui.Event;
+import ui.SnakeUserInterface;
+import ui.UserInterfaceFactory;
+import ui.UIHulpMethodes;
+
+public class Snake {
+
+	static final int BREEDTE_BORD = 10; // van links naar rechts : x
+	static final int LENGTE_BORD = 10; // van boven naar beneden : y
+	static final double FRAMES_PER_SECOND = 2;
+	CoordinateRow slang;
+	Coordinate richting;
+	Coordinate appel;
+
+	SnakeUserInterface ui;
+	UIHulpMethodes hulp;
+
+	Snake(){
+		ui = UserInterfaceFactory.geefSnakeUI(BREEDTE_BORD, LENGTE_BORD);
+	}
+
+	void leesActie(Event event){
+		if (event.naam.equals("alarm")){
+			verplaats();
+		} else if (event.data.equals("L")){
+			richting.x = -1;
+			richting.y = 0;
+		} else if (event.data.equals("R")){
+			richting.x = 1;
+			richting.y = 0;
+		} else if (event.data.equals("OL")){
+			richting.x = 0;
+			richting.y = 1;
+		} else if (event.data.equals("OH")){
+			richting.x = 0;
+			richting.y = -1;
+		}
+	}
+	
+	void verplaats (){
+		ui.plaats(slang.coordinateArray[slang.aantalElementen-1].x, slang.coordinateArray[slang.aantalElementen-1].y, ui.LEEG);
+		slang.laatsteWeg();
+		verplaatsKop();
+		bordRanden();
+		ui.plaats(slang.coordinateArray[0].x, slang.coordinateArray[0].y, ui.SNAKE);
+		ui.toon();	
+	}
+	
+	void verplaatsKop(){
+		Coordinate kop = new Coordinate();
+		kop = slang.coordinateArray[0].opschuiven(richting);
+		slang = slang.samenvoegen(kop);
+	}
+
+	void bordRanden(){
+		if (slang.coordinateArray[0].x > BREEDTE_BORD-1){
+			slang.coordinateArray[0].x = 0;
+		} else if (slang.coordinateArray[0].y > LENGTE_BORD-1){
+			slang.coordinateArray[0].y = 0;
+		} else if (slang.coordinateArray[0].x < 0){
+			slang.coordinateArray[0].x = BREEDTE_BORD-1;
+		} else if (slang.coordinateArray[0].y < 0){																				
+			slang.coordinateArray[0].y = LENGTE_BORD-1;
+		}
+	}
+
+	void gebeurtenis(){
+		if (slang.coordinateArray[0].x == appel.x && slang.coordinateArray[0].y == appel.y){
+			slang.voegToe(slang.coordinateArray[slang.aantalElementen-1]);
+			ui.plaats(slang.coordinateArray[slang.aantalElementen-1].x, slang.coordinateArray[slang.aantalElementen-1].y, ui.SNAKE);
+			ui.toon();
+			plaatsAppel();
+		}
+		if (checkPlek(slang.coordinateArray[0], "")){
+			System.exit(1);
+		}
+	}
+	
+	Boolean checkPlek (Coordinate plek, String tekst){
+		if (tekst.equals("wel")){
+			for (int i = 0; i < slang.aantalElementen; i++){
+				if (plek.x == slang.coordinateArray[i].x && plek.y == slang.coordinateArray[i].y){
+					return true;
+				}
+			}
+			return false;
+		} else {
+			for (int i = 1; i < slang.aantalElementen; i++){
+				if (plek.x == slang.coordinateArray[i].x && plek.y == slang.coordinateArray[i].y){
+					return true;
+				}
+			}
+			return false;
+		}
+	}
+
+	void plaatsAppel(){
+		appel = new Coordinate();
+		do {
+			appel.x = hulp.geefRandom(0, BREEDTE_BORD);
+			appel.y = hulp.geefRandom(0, LENGTE_BORD);
+		} while (checkPlek(appel, "wel"));
+		ui.plaats(appel.x, appel.y, ui.ETEN);
+		ui.toon();
+	}
+	
+	void uitgangspositie(){
+		Coordinate slangHoofd = new Coordinate(0,1);
+		Coordinate slangNek = new Coordinate(0,0);
+		slang.voegToe(slangHoofd);
+		slang.voegToe(slangNek);
+		richting = new Coordinate(1,0);	
+		ui.plaats(slang.coordinateArray[0].x, slang.coordinateArray[0].y, ui.SNAKE);
+		ui.plaats(slang.coordinateArray[1].x, slang.coordinateArray[1].y, ui.SNAKE);
+	}
+
+	public void start(){
+		ui.zetAnimatieSnelheid(FRAMES_PER_SECOND);
+		slang = new CoordinateRow();
+		uitgangspositie();
+		plaatsAppel();
+		while (true){
+			Event event = ui.geefEvent();
+			leesActie(event);
+			gebeurtenis();
+		}
+	}
+
+	public static void main (String[] argv){
+		new Snake().start();
+	}
+
+}
